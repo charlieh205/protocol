@@ -76,7 +76,7 @@ class ProtocolException(Exception):
         err_msg : str
             The error message of the exception.
         """
-        self._err_msg = err_msg
+        self.__err_msg = err_msg
 
     def __str__(self) -> str:
         """Get the string representation of the `ProtocolException` object.
@@ -86,47 +86,47 @@ class ProtocolException(Exception):
         str
             The string representation of the `ProtocolException` object.
         """
-        return self._err_msg
+        return self.__err_msg
+
 
 class Protocol:
     """Class representing a network protocol header.
-    
+
     Objects are constructed by passing a textual protocol specification. Once that is done, instances can be printed by
     converting them to a `str` type.
     """
 
-    _DEFAULT_HDR_CHAR_START = "+"  # Character for start of the border line
-    _DEFAULT_HDR_CHAR_END = "+"  # Character for end of the border line
-    _DEFAULT_HDR_CHAR_FILL_ODD = "+"  # Fill character for border odd positions
-    _DEFAULT_HDR_CHAR_FILL_EVEN = "-"  # Fill character for border even positions
-    _DEFAULT_HDR_CHAR_SEP = "|"  # Field separator character
-    _DEFAULT_BITS_PER_LINE = 32  # Number of bits per line
-    _DEFAULT_DO_PRINT_TOP_TENS = True  # True: print top numbers for bit tens
-    _DEFAULT_DO_PRINT_TOP_UNITS = True  # True: print top numbers for bit units
+    __DEFAULT_HDR_CHAR_START = "+"  # Character for start of the border line
+    __DEFAULT_HDR_CHAR_END = "+"  # Character for end of the border line
+    __DEFAULT_HDR_CHAR_FILL_ODD = "+"  # Fill character for border odd positions
+    __DEFAULT_HDR_CHAR_FILL_EVEN = "-"  # Fill character for border even positions
+    __DEFAULT_HDR_CHAR_SEP = "|"  # Field separator character
+    __DEFAULT_BITS_PER_LINE = 32  # Number of bits per line
+    __DEFAULT_DO_PRINT_TOP_TENS = True  # True: print top numbers for bit tens
+    __DEFAULT_DO_PRINT_TOP_UNITS = True  # True: print top numbers for bit units
 
     def __init__(self, specification: str) -> None:
         """Initialize the `Protocol` object.
-        
+
         Parameters
         ----------
         specification : str
             The textual specification that describes the protocol.
         """
-        self._hdr_char_start: str = Protocol._DEFAULT_HDR_CHAR_START
-        self._hdr_char_end: str = Protocol._DEFAULT_HDR_CHAR_END
-        self._hdr_char_fill_odd: str = Protocol._DEFAULT_HDR_CHAR_FILL_ODD
-        self._hdr_char_fill_even: str = Protocol._DEFAULT_HDR_CHAR_FILL_EVEN
-        self._hdr_char_sep: str = Protocol._DEFAULT_HDR_CHAR_SEP
-        self._bits_per_line: int = Protocol._DEFAULT_BITS_PER_LINE
-        self._do_print_top_tens: bool = Protocol._DEFAULT_DO_PRINT_TOP_TENS
-        self._do_print_top_units: bool = Protocol._DEFAULT_DO_PRINT_TOP_UNITS
-        self._field_list: list[dict[str, str | int]]  = []
-        self._parse_spec(specification=specification)
+        self.__hdr_char_start: str = Protocol.__DEFAULT_HDR_CHAR_START
+        self.__hdr_char_end: str = Protocol.__DEFAULT_HDR_CHAR_END
+        self.__hdr_char_fill_odd: str = Protocol.__DEFAULT_HDR_CHAR_FILL_ODD
+        self.__hdr_char_fill_even: str = Protocol.__DEFAULT_HDR_CHAR_FILL_EVEN
+        self.__hdr_char_sep: str = Protocol.__DEFAULT_HDR_CHAR_SEP
+        self.__bits_per_line: int = Protocol.__DEFAULT_BITS_PER_LINE
+        self.__do_print_top_tens: bool = Protocol.__DEFAULT_DO_PRINT_TOP_TENS
+        self.__do_print_top_units: bool = Protocol.__DEFAULT_DO_PRINT_TOP_UNITS
+        self.__field_list: list[dict[str, str | int | bool]] = []
+        self.__parse_spec(specification=specification)
 
-
-    def _parse_spec(self, specification: str) -> None:
+    def __parse_spec(self, specification: str) -> None:
         """Parse the textual protocol specification and store the relevant internal states for later ASCII conversion.
-        
+
         Parameters
         ----------
         specification : str
@@ -149,13 +149,14 @@ class Protocol:
             try:
                 text, bits = item.split(":")
                 bits = int(bits)
-                if bits <= 0:
-                    err_msg = f"FATAL: Fields must be at least one bit long ({specification})"
-                    raise ProtocolException(err_msg)
-            except Exception as err:
+            except ValueError as err:
                 err_msg = f"FATAL: Invalid field_list specification ({specification})"
                 raise ProtocolException(err_msg) from err
-            self._field_list.append({"text": text, "len": bits})
+            if bits <= 0:
+                err_msg = f"FATAL: Fields must be at least one bit long ({specification})"
+                raise ProtocolException(err_msg)
+
+            self.__field_list.append({"text": text, "len": bits})
 
         # Parse options
         if opts is not None:
@@ -163,139 +164,139 @@ class Protocol:
             for opt in opts:
                 try:
                     var, value = opt.split("=")
-                    if var.lower() == "bits":
-                        self._bits_per_line = int(value)
-                        if self._bits_per_line <= 0:
-                            err_msg = f"FATAL: Invalid value for 'bits' option ({value})"
-                            raise ProtocolException(err_msg)
-                    elif var.lower() == "numbers":
-                        if value.lower() in ["0", "n", "no", "none", "false"]:
-                            self._do_print_top_tens = False
-                            self._do_print_top_units = False
-                        elif value.lower() in ["1", "y", "yes", "none", "true"]:
-                            self._do_print_top_tens = True
-                            self._do_print_top_units = True
-                        else:
-                            raise ProtocolException("FATAL: Invalid value for 'numbers' option (%s)" % value)
-                    elif var.lower() in ["oddchar", "evenchar", "startchar", "endchar", "sepchar"]:
-                        if len(value) > 1 or len(value) <= 0:
-                            raise ProtocolException("FATAL: Invalid value for '%s' option (%s)" % (var, value))
-                        else:
-                            if var.lower() == "oddchar":
-                                self._hdr_char_fill_odd = value
-                            elif var.lower() == "evenchar":
-                                self._hdr_char_fill_even = value
-                            elif var.lower() == "startchar":
-                                self._hdr_char_start = value
-                            elif var.lower() == "endchar":
-                                self._hdr_char_end = value
-                            elif var.lower() == "sepchar":
-                                self._hdr_char_sep = value
-                except ProtocolException:
-                    raise
-                except:
-                    raise ProtocolException("FATAL: Invalid options specification (%s)" % opt)
+                except ValueError as err:
+                    err_msg = f"FATAL: Invalid options specification ({opt})"
+                    raise ProtocolException(err_msg) from err
+                if var.lower() == "bits":
+                    try:
+                        self.__bits_per_line = int(value)
+                    except ValueError as err:
+                        err_msg = f"FATAL: Invalid options specification ({opt})"
+                        raise ProtocolException(err_msg) from err
+                    if self.__bits_per_line <= 0:
+                        err_msg = f"FATAL: Invalid value for 'bits' option ({value})"
+                        raise ProtocolException(err_msg)
+                elif var.lower() == "numbers":
+                    if value.lower() in ["0", "n", "no", "none", "false"]:
+                        self.__do_print_top_tens = False
+                        self.__do_print_top_units = False
+                    elif value.lower() in ["1", "y", "yes", "none", "true"]:
+                        self.__do_print_top_tens = True
+                        self.__do_print_top_units = True
+                    else:
+                        raise ProtocolException("FATAL: Invalid value for 'numbers' option (%s)" % value)
+                elif var.lower() in ["oddchar", "evenchar", "startchar", "endchar", "sepchar"]:
+                    if len(value) > 1 or len(value) <= 0:
+                        raise ProtocolException("FATAL: Invalid value for '%s' option (%s)" % (var, value))
+                    else:
+                        if var.lower() == "oddchar":
+                            self.__hdr_char_fill_odd = value
+                        elif var.lower() == "evenchar":
+                            self.__hdr_char_fill_even = value
+                        elif var.lower() == "startchar":
+                            self.__hdr_char_start = value
+                        elif var.lower() == "endchar":
+                            self.__hdr_char_end = value
+                        elif var.lower() == "sepchar":
+                            self.__hdr_char_sep = value
 
-        return self._field_list
+    def __get_top_numbers(self) -> str | None:
+        """Get the string representing the bit units and bit tens on top of the protocol header.
 
-    def _get_top_numbers(self):
-        """
-        @return a string representing the bit units and bit tens on top of the
-        protocol header. Note that a proper string is only returned if one or
-        both self._do_print_top_tens and self._do_print_top_units is True.
-        The returned string is not \n terminated, but it may contain a newline
-        character in the middle.
+        Returns
+        -------
+        str
+            The string representing the bit units and bit tens on top of the protocol header, or None if there is none.
+
+        Notes
+        -----
+        A proper string is only returned if one or both of `self.__do_print_top_tens` and `self.__do_print_top_units` is
+        True. The returned string is not '\\n' terminated, but it may contain one in the middle.
         """
         lines = ["", ""]
-        if self._do_print_top_tens is True:
-            for i in range(0, self._bits_per_line):
+        if self.__do_print_top_tens:
+            for i in range(self.__bits_per_line):
                 if str(i)[-1:] == "0":
-                    lines[0] += " %s" % str(i)[0]
+                    lines[0] += f" {str(i)[0]}"
                 else:
                     lines[0] += "  "
             lines[0] += "\n"
-        if self._do_print_top_units is True:
-            for i in range(0, self._bits_per_line):
-                lines[1] += " %s" % str(i)[-1:]
-            # lines[1]+="\n"
+        if self.__do_print_top_units:
+            for i in range(self.__bits_per_line):
+                lines[1] += f" {str(i)[-1:]}"
         result = "".join(lines)
         return result if len(result) > 0 else None
 
-    def _get_horizontal(self, width=None):
+    def __get_horizontal(self, width: int | None = None):
+        """Get the horizontal border line that separates field rows.
+
+        Parameters
+        ----------
+        width : int | None, optional
+            The number of field bits the line should cover, or None to cover the entire length of the header, by default
+            None.
         """
-        @return the horizontal border line that separates field rows.
-        @param width controls how many field bits the line should cover. By
-        default, if no width is supplied, the line covers the hole length of
-        the header.
-        """
-        if width is None:
-            width = self._bits_per_line
+        width = self.__bits_per_line if width is None else width
         if width <= 0:
             return ""
         else:
-            a = "%s" % self._hdr_char_start
-            b = (self._hdr_char_fill_even + self._hdr_char_fill_odd) * (width - 1)
-            c = "%s%s" % (self._hdr_char_fill_even, self._hdr_char_end)
-            return a + b + c
+            return (
+                self.__hdr_char_start
+                + ((self.__hdr_char_fill_even + self.__hdr_char_fill_odd) * (width - 1))
+                + self.__hdr_char_fill_even
+                + self.__hdr_char_end
+            )
 
-    def _get_separator(self, line_end=""):
-        """
-        @return a string containing a protocol field separator. Returned string
-        is a single character and matches whatever is stored in self._hdr_char_sep
-        """
-        return self._hdr_char_sep
+    def __process_field_list(self) -> list[dict[str, str | int | bool]]:
+        """Process the list of protocol fields in the specification into printable output.
 
-    def _process_field_list(self):
+        Returns
+        -------
+        dist[str, str | int | bool]
+            The list of protocol fields in an easily printable format.
         """
-        Processes the list of protocol fields that we got from the specification and turns
-        it into something that we can print easily (useful for cases when we have
-        protocol fields that span more than one line). This is just a helper
-        function to make __str__()'s life easier.
-        """
-        new_fields = []
+        new_fields: list[dict[str, str | int | bool]] = []
         bits_in_line = 0
         i = 0
-        while i < len(self._field_list):
+        while i < len(self.__field_list):
             # Extract all the info we need about the field
-            field = self._field_list[i]
-            field_text = field["text"]
-            field_len = field["len"]
+            field = self.__field_list[i]
+            field_text: str = field["text"]  # type: ignore
+            field_len: int = field["len"]  # type: ignore
             field["MF"] = False
 
-            available_in_line = self._bits_per_line - bits_in_line
+            available_in_line = self.__bits_per_line - bits_in_line
 
-            # If we have enough space on this line to include the current field
-            # then just keep it as it is.
+            # If we have enough space on this line to include the current field then just keep it as it is.
             if available_in_line >= field_len:
                 new_fields.append(field)
                 bits_in_line += field_len
                 i += 1
-                if bits_in_line == self._bits_per_line:
+                if bits_in_line == self.__bits_per_line:
                     bits_in_line = 0
-            # Otherwise, split the field into two parts, one blank and one with
-            # the actual field text
+            # Otherwise, split the field into two parts, one blank and one with the actual field text
             else:
-                # Case 1: We have a field that is perfectly aligned and it
-                # has a length that is multiple of our line length
-                if bits_in_line == 0 and field_len % self._bits_per_line == 0:
+                # Case 1: field that is perfectly aligned and has a length that is multiple of line length
+                if bits_in_line == 0 and field_len % self.__bits_per_line == 0:
                     new_fields.append(field)
                     i += 1
                     bits_in_line = 0
 
-                # Case 2: We weren't that lucky and the field is either not
-                # aligned or we can't print it using an exact number of full
-                # lines
+                # Case 2:  field is either not aligned or we can't print it using an exact number of full lines
                 else:
-                    # If we have more space in the current line than in the next,
-                    # then put the field text in this one
+                    # If we have more space in the current line than in the next, then put the field text in this one
                     if available_in_line >= field_len - available_in_line:
-                        new_field = {"text": field_text, "len": available_in_line, "MF": True}
+                        new_field: dict[str, str | int | bool] = {
+                            "text": field_text,
+                            "len": available_in_line,
+                            "MF": True,
+                        }
                         new_fields.append(new_field)
                         field["text"] = ""
                         field["len"] = field_len - available_in_line
                         field["MF"] = False
                     else:
-                        new_field = {"text": "", "len": available_in_line, "MF": True}
+                        new_field: dict[str, str | int | bool] = {"text": "", "len": available_in_line, "MF": True}
                         new_fields.append(new_field)
                         field["text"] = field_text
                         field["len"] = field_len - available_in_line
@@ -304,25 +305,20 @@ class Protocol:
                     continue
         return new_fields
 
-    # Convert to string
     def __str__(self):
-        """
-        Converts the protocol specification stored in the object to a nice
-        ASCII diagram like the ones that appear in RFCs. Conversion supports
-        fields of any length, and supports field that span more than one
-        line in the diagram.
-        @return a string containing the ASCII representation of the protocol
-        header.
-        """
+        """Get the ASCII representation of the protocol specification.
 
-        # First of all, process our field list. This does some magic to make
-        # the algorithm work for fields that span more than one line
-        proto_fields = self._process_field_list()
-        lines = []
-        numbers = self._get_top_numbers()
-        if numbers is not None:
+        Returns
+        -------
+        str
+            The ASCII representation of the protocol specification.
+        """
+        # Process our field list to make the algorithm work for fields that span more than one line
+        proto_fields = self.__process_field_list()
+        lines: list[str] = []
+        if (numbers := self.__get_top_numbers()) is not None:
             lines.append(numbers)
-        lines.append(self._get_horizontal())
+        lines.append(self.__get_horizontal())
 
         # Print all protocol fields
         bits_in_line = 0
@@ -334,129 +330,117 @@ class Protocol:
 
             # Extract all the info we need about the field
             field = proto_fields[p]
-            field_text = field["text"]
-            field_len = field["len"]
-            field_mf = field["MF"] is True  # Field has more fragments
+            field_text: str = field["text"]  # type: ignore
+            field_len: int = field["len"]  # type: ignore
+            field_mf: bool = field["MF"]  # type: ignore
 
-            # If the field text is too long, we truncate it, and add a dot
-            # at the end.
+            # If the field text is too long, we truncate it, and add a "." at the end.
             if len(field_text) > (field_len * 2) - 1:
                 field_text = field_text[0 : (field_len * 2) - 1]
                 if len(field_text) > 1:
                     field_text = field_text[0:-1] + "."
 
-            # If we have space for the whole field in the current line, go
-            # ahead and add it
-            if self._bits_per_line - bits_in_line >= field_len:
-                # If this is the first thing we print on a line, add the
-                # starting character
+            # If we have space for the whole field in the current line, go ahead and add it
+            if self.__bits_per_line - bits_in_line >= field_len:
+                # If this is the first thing we print on a line, add the starting character
                 if bits_in_line == 0:
-                    current_line += self._get_separator()
+                    current_line += self.__hdr_char_sep
 
                 # Add the whole field
-                current_line += str.center(field_text, (field_len * 2) - 1)
+                current_line += field_text.center((field_len * 2) - 1)
 
                 # Update counters
                 bits_in_line += field_len
                 fields_done += 1
 
                 # If this is the last character in the line, store the line
-                if bits_in_line == self._bits_per_line:
-                    current_line += self._get_separator()
+                if bits_in_line == self.__bits_per_line:
+                    current_line += self.__hdr_char_sep
                     lines.append(current_line)
                     current_line = ""
                     bits_in_line = 0
-                    # When we have a fragmented field, we may need to suppress
-                    # the floor of the field, so the current line connects
-                    # with the one that follows. E.g.:
+                    # When we have a fragmented field, we may need to suppress the floor of the field, so the current
+                    # line connects with the one that follows. E.g.:
                     # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
                     # |            field16            |                               |
                     # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               +
                     # |                             field                             |
                     # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                    if field_mf is True:
-                        if proto_fields[p + 1]["len"] > self._bits_per_line - field_len:
+                    if field_mf:
+                        if proto_fields[p + 1]["len"] > self.__bits_per_line - field_len:  # type: ignore
                             # Print some +-+-+ to cover the previous field
-                            line_left = self._get_horizontal(self._bits_per_line - field_len)
+                            line_left = self.__get_horizontal(self.__bits_per_line - field_len)
                             if len(line_left) == 0:
-                                line_left = self._hdr_char_start
+                                line_left = self.__hdr_char_start
 
-                            # Now print some empty space to cover the part that
-                            # we can join with the field below.
-                            # Case 1: If the next field reaches the end of its
-                            # line, then we need to print whitespace until the
-                            # end our line
-                            if proto_fields[p + 1]["len"] >= self._bits_per_line:
+                            # Now print some empty space to cover the part that we can join with the field below.
+                            # Case 1: If the next field reaches the end of its line, then we need to print whitespace
+                            # until the end our line
+                            if proto_fields[p + 1]["len"] >= self.__bits_per_line:  # type: ignore
                                 line_center = " " * (2 * (field_len) - 1)
-                                line_right = self._hdr_char_end
-                            # Case 2: the field in the next row is not big enough
-                            # to cover all the space we'd like to join, so we
-                            # just print whitespace to cover as much as we can
+                                line_right = self.__hdr_char_end
+                            # Case 2: the field in the next row is not big enough to cover all the space we'd like to
+                            # join, so we just print whitespace to cover as much as we can
                             else:
                                 line_center = " " * (
-                                    (2 * (proto_fields[p + 1]["len"] - (self._bits_per_line - field_len))) - 1
+                                    (2 * (proto_fields[p + 1]["len"] - (self.__bits_per_line - field_len))) - 1
                                 )
-                                line_right = self._get_horizontal(self._bits_per_line - proto_fields[p + 1]["len"])
+                                line_right = self.__get_horizontal(self.__bits_per_line - proto_fields[p + 1]["len"])
 
                             lines.append(line_left + line_center + line_right)
                         else:
-                            lines.append(self._get_horizontal())
+                            lines.append(self.__get_horizontal())
                     else:
-                        lines.append(self._get_horizontal())
+                        lines.append(self.__get_horizontal())
 
-                # If this is not the last character of the line but we have no
-                # more fields to print, wrap up
+                # If this is not the last character of the line but we have no more fields to print, wrap up
                 elif fields_done == len(proto_fields):
-                    current_line += self._get_separator()
+                    current_line += self.__hdr_char_sep
                     lines.append(current_line)
-                    lines.append(self._get_horizontal(bits_in_line))
+                    lines.append(self.__get_horizontal(bits_in_line))
                 else:
                     # Add the separator character
-                    current_line += self._hdr_char_sep
+                    current_line += self.__hdr_char_sep
 
             # We don't have enough space for the field on this line.
             else:
-                # Case 1: We are at the beginning of a new line and we need to
-                # span more than one line
+                # Case 1: We are at the beginning of a new line and we need to span more than one line
                 if bits_in_line == 0:
                     # Case 1a: We have a multiple of the number of bits per line
-                    if field_len % self._bits_per_line == 0:
-                        # Compute how many lines in total we need to print for this
-                        # big field.
-                        lines_to_print = int(((field_len / self._bits_per_line) * 2) - 1)
+                    if field_len % self.__bits_per_line == 0:
+                        # Compute how many lines in total we need to print for this big field.
+                        lines_to_print = int(((field_len / self.__bits_per_line) * 2) - 1)
                         # We print the field text in the central line
                         central_line = int(lines_to_print / 2)
                         # Print all those lines
-                        for i in range(0, lines_to_print):
-                            # Let's figure out which character we need to use
-                            # to start and end the current line
+                        for i in range(lines_to_print):
+                            # Let's figure out which character we need to use to start and end the current line
                             if i % 2 == 1:
-                                start_line = self._hdr_char_start
-                                end_line = self._hdr_char_end
+                                start_line = self.__hdr_char_start
+                                end_line = self.__hdr_char_end
                             else:
-                                start_line = self._hdr_char_sep
-                                end_line = self._hdr_char_sep
+                                start_line = self.__hdr_char_sep
+                                end_line = self.__hdr_char_sep
 
                             # This is the line where we need to print the field
                             # text.
                             if i == central_line:
                                 lines.append(
-                                    start_line + str.center(field_text, (self._bits_per_line * 2) - 1) + end_line
+                                    start_line + str.center(field_text, (self.__bits_per_line * 2) - 1) + end_line
                                 )
                             # This is a line we need to leave blank
                             else:
-                                lines.append(start_line + (" " * ((self._bits_per_line * 2) - 1)) + end_line)
+                                lines.append(start_line + (" " * ((self.__bits_per_line * 2) - 1)) + end_line)
                             # If we just added the last line, add a horizontal separator
                             if i == lines_to_print - 1:
-                                lines.append(self._get_horizontal())
+                                lines.append(self.__get_horizontal())
 
-                # Case 2: We are not at the beginning of the line and we need
-                # to print something that does not fit in the current line
+                # Case 2: We are not at the beginning of the line and we need to print something that does not fit in
+                # the current line
                 else:
-                    # This should never happen, since our _process_field_list()
-                    # divides fields in chunks so we never have the case of
-                    # something spanning lines in a weird manner
-                    assert False
+                    # This should never happen, since our `__process_field_list()` divides fields in chunks so we never
+                    # have the case of something spanning lines in a weird manner
+                    err_msg = "FATAL: this should never occur"
+                    raise AssertionError(err_msg)
 
-        result = "\n".join(lines)
-        return result
+        return "\n".join(lines)

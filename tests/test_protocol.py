@@ -362,7 +362,7 @@ def test_regular_specs(valid_spec: str, expected: str) -> None:
     expected : str
         The expected ASCII protocol header.
     """
-    assert str(protocol.Protocol(spec=valid_spec)) == expected
+    assert str(protocol.Protocol(valid_spec)) == expected
 
 
 @pytest.mark.parametrize("invalid_spec", _INVALID_CASES)
