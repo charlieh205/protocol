@@ -1,4 +1,4 @@
-#!/usr/bin/python
+"""The implementation of the protocol functionality."""
 ################################################################################
 #                    ____            _                  _                      #
 #                   |  _ \ _ __ ___ | |_ ___   ___ ___ | |                     #
@@ -55,16 +55,14 @@
 #                                                                              #
 ################################################################################
 
-# STANDARD LIBRARY IMPORTS
+from future import __annotations__
+
+import datetime
 import sys
-from datetime import date
 
-# INTERNAL IMPORTS
-from constants import *
-import specs
+from protocol import constants, specs
 
 
-# CLASS DEFINITIONS
 class ProtocolException(Exception):
     """
     This class represents exceptions raised by the Protocol class
@@ -470,7 +468,7 @@ class Main():
         """
         print("")
         print("%s v%s" % (APPLICATION_NAME, APPLICATION_VERSION))
-        print("Copyright (C) %i, %s (%s)." % (max(2014, date.today().year), APPLICATION_AUTHOR, APPLICATION_AUTHOR_EMAIL))
+        print("Copyright (C) %i, %s (%s)." % (max(2014, datetime.date.today().year), APPLICATION_AUTHOR, APPLICATION_AUTHOR_EMAIL))
         print("This software comes with ABSOLUTELY NO WARRANTY.")
         print("")
         self.display_usage()

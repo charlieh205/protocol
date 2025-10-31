@@ -1,4 +1,4 @@
-#!/usr/bin/python
+"""Constants used throughout the package."""
 ################################################################################
 #                    ____            _                  _                      #
 #                   |  _ \ _ __ ___ | |_ ___   ___ ___ | |                     #
@@ -16,7 +16,7 @@
 #       -> E-Mail: luis.mgarc@gmail.com                                        #
 #       -> WWWW:   http://www.luismg.com                                       #
 #       -> GitHub: https://github.com/luismartingarcia                         #
-#                                                                              #
+#                                                                              #                                           #
 ################################################################################
 #                                                                              #
 #  This file is part of Protocol.                                              #
@@ -48,15 +48,23 @@
 #                                                                              #
 # Description:                                                                 #
 #                                                                              #
-#  This is the installer script for Protocol. This can be run from the         #
-#  command-line as follows:                                                    #
-#                                                                              #
-#   sudo ./setup.py install                                                    #
+#  This file contains a few constants used throughout the rest of the source.  #
 #                                                                              #
 ################################################################################
 
-from distutils.core import setup, Extension
-setup(name='protocol',
-      version='0.1',
-      scripts=['protocol', 'constants.py', 'specs.py']
-      )
+# Application name
+APPLICATION_NAME="Protocol"
+
+# Current version
+APPLICATION_VERSION="0.1.0"
+
+# Author
+APPLICATION_AUTHOR="Luis MartinGarcia"
+
+# Author E-mail
+APPLICATION_AUTHOR_EMAIL="luis.mgarc@gmail.com"
+
+# Operation return codes
+OP_SUCCESS =  0                # Function performed operation successfully
+OP_FAILURE = -1                # Error encountered while performing operation
+

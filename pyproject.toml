@@ -1,0 +1,97 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling-build"
+
+[project]
+name = "protocol"
+dynamic = ["version"]
+readme = "README.txt"
+requires-python = ">=3.9"
+
+[project.scripts]
+protocol = "protocol.__main__:main"
+
+[tool.hatch.version]
+path = "src/protocol/__about__.py"
+
+[tool.hatch.envs.format]
+extra-dependencies = [
+    "ruff",
+]
+
+[tool.hatch.envs.format.scripts]
+run = "ruff format"
+
+[tool.hatch.envs.lint]
+extra-dependencies = [
+    "ruff",
+    "pylint",
+    "pytest",
+]
+
+[tool.hatch.envs.lint.scripts]
+check = [
+    "ruff format --check",
+    "ruff check",
+    "pylint .",
+]
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+    "mypy>=1.0.0",
+]
+
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/protocol tests}"
+
+[tool.coverage.run]
+source_pkgs = ["protocol", "tests"]
+branch = true
+parallel = true
+omit = [
+    "src/taskdispatcher/__about__.py",
+]
+
+[tool.coverage.paths]
+protocol = [
+    "src/protocol",
+    "*/protocol/src/protocol",
+]
+tests = [
+    "tests",
+    "*/protocol/tests",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "no cov",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+
+[tool.pytest.ini_options]
+pythonpath = [
+    "src",
+]
+testpaths = [
+    "tests",
+]
+
+[tool.ruff]
+indent-width = 4
+line-length = 120
+
+[tool.ruff.format]
+indent-style = "space"
+skip-magic-trailing-comma = false
+
+[tool.ruff.lint]
+select = "ALL"
+ignore = [
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.pylint]
+max-line-length = 120
