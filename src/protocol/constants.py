@@ -53,18 +53,17 @@
 ################################################################################
 
 # Application name
-APPLICATION_NAME="Protocol"
+APPLICATION_NAME = "Protocol"
 
 # Current version
-APPLICATION_VERSION="0.1.0"
+APPLICATION_VERSION = "0.1.0"
 
 # Author
-APPLICATION_AUTHOR="Luis MartinGarcia"
+APPLICATION_AUTHOR = "Luis MartinGarcia"
 
 # Author E-mail
-APPLICATION_AUTHOR_EMAIL="luis.mgarc@gmail.com"
+APPLICATION_AUTHOR_EMAIL = "luis.mgarc@gmail.com"
 
 # Operation return codes
-OP_SUCCESS =  0                # Function performed operation successfully
-OP_FAILURE = -1                # Error encountered while performing operation
-
+OP_SUCCESS = 0  # Function performed operation successfully
+OP_FAILURE = -1  # Error encountered while performing operation
