@@ -52,16 +52,11 @@
 #                                                                              #
 ################################################################################
 
-# STANDARD LIBRARY IMPORTS
-import imp
-import unittest
-
-# IMPORT PROTOCOL (need to use the imp library since "protocol" does not
-# have a .py extension
-protocol = imp.load_source("protocol", "protocol")
+import protocol
+import pytest
 
 # List of test cases. It contains tuples of the form (protocol_spec, expected_output)
-validcases = [
+_valid_cases = [
     (
         "Field_32:32",
         """ 0                   1                   2                   3  
@@ -266,7 +261,7 @@ Urgent Pointer:16,Options:24,Padding:8",
 
 
 # List of invalid test cases. It contains incorrect protocol specs.
-invalidcases = [
+_invalid_cases = [
     "Field_64:64?bits=",
     "Field_64:64?bits=A",
     "Field_64:64?bits=0",
@@ -301,40 +296,28 @@ invalidcases = [
 ]
 
 
-class ProtocolTests(unittest.TestCase):
-    def test_regular_specs(self):
-        """
-        This function tests correctness for a number of known specs. It
-        instances a Protocol() passing a particular expect and then it compares
-        the str() of the instance with the expected ASCII protocol header.
-        """
-        for i in range(0, len(validcases)):
-            print("Testing Valid Spec '%s'" % validcases[i][0])
-            p = protocol.Protocol(validcases[i][0])
-            self.assertEqual(str(p), validcases[i][1])
+@pytest.mark.parametrize("valid_spec,expected", [pytest.param(valid_spec, expected, id=valid_spec) for valid_spec, expected in _valid_cases])
+def test_regular_specs(valid_spec: str, expected: str) -> None:
+    """Test that a valid specification produces the correct ASCII protocol header.
 
-    def test_invalid_specs(self):
-        """
-        This function tests the Protocol class for input validation. A number of
-        invalid specs are passed. The constructor of the class is expected to raise
-        the appropriate exceptions.
-        """
-        for i in range(0, len(invalidcases)):
-            print("Testing Invalid Spec '%s'" % invalidcases[i])
-            self.assertRaises(protocol.ProtocolException, protocol.Protocol, invalidcases[i])
+    Parameters
+    ----------
+    valid_spec : str
+        The valid specification.
+    expected : str
+        The expected ASCII protocol header.
+    """
+    assert str(protocol.Protocol(spec=valid_spec)) == expected
 
 
-if __name__ == "__main__":
-    # Print our fancy ASCII header
-    print("#########################################################################")
-    print("#             ____            _                  _                      #")
-    print("#            |  _ \ _ __ ___ | |_ ___   ___ ___ | |                     #")
-    print("#            | |_) | '__/ _ \| __/ _ \ / __/ _ \| |                     #")
-    print("#            |  __/| | | (_) | || (_) | (_| (_) | |                     #")
-    print("#            |_|   |_|  \___/ \__\___/ \___\___/|_|                     #")
-    print("#                                                                       #")
-    print('#                 == "Protocol" Test Suite ==                           #')
-    print("#                                                                       #")
-    print("#########################################################################")
-    # Run the actual tests
-    unittest.main()
+@pytest.mark.parametrize("invalid_spec", _invalid_cases)
+def test_invalid_specs(invalid_spec: str) -> None:
+    """Test that an invalid specification produces a `protocol.ProtocolException` to be raised.
+    
+    Parameters
+    ----------
+    invalid_spec : str
+        The invalid specification.
+    """
+    with pytest.raises(protocol.ProtocolException):
+        _ = protocol.Protocol(invalid_spec)

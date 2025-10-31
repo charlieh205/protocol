@@ -45,11 +45,14 @@ extra-dependencies = [
 check = "mypy --install-types --non-interactive {args:src/protocol tests}"
 
 [tool.coverage.run]
-source_pkgs = ["protocol", "tests"]
 branch = true
-parallel = true
+source = [
+    "src",
+]
 omit = [
-    "src/taskdispatcher/__about__.py",
+    "*/__about__.py",
+    "*/__init__.py",
+    "tests/*",
 ]
 
 [tool.coverage.paths]

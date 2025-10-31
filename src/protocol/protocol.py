@@ -55,12 +55,14 @@
 #                                                                              #
 ################################################################################
 
-from future import __annotations__
+from __future__ import annotations
 
 import datetime
 import sys
 
 from protocol import constants, specs
+
+__all__ = ("Protocol", "ProtocolException")
 
 
 class ProtocolException(Exception):
