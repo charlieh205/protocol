@@ -1,4 +1,6 @@
 """The main entrypoint to the protocol package."""
+
+
 class Main:
     """
     This class does all the boring task of a command-line application. It parses
@@ -273,7 +275,7 @@ class Main:
 
 def main() -> int:
     """Run the protocol program.
-    
+
     Returns
     -------
     int
