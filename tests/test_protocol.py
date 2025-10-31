@@ -367,12 +367,12 @@ def test_regular_specs(valid_spec: str, expected: str) -> None:
 
 @pytest.mark.parametrize("invalid_spec", _INVALID_CASES)
 def test_invalid_specs(invalid_spec: str) -> None:
-    """Test that an invalid specification produces a `protocol.ProtocolException`.
+    """Test that an invalid specification produces a `protocol.ProtocolError`.
 
     Parameters
     ----------
     invalid_spec : str
         The invalid specification.
     """
-    with pytest.raises(protocol.ProtocolException):
+    with pytest.raises(protocol.ProtocolError):
         _ = protocol.Protocol(invalid_spec)

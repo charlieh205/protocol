@@ -222,7 +222,7 @@ class Main:
                     try:
                         proto = Protocol(spec)
                         self.protocols.append(proto)
-                    except ProtocolException as e:
+                    except ProtocolError as e:
                         print("ERROR: %s" % str(e))
                         sys.exit(1)
 
