@@ -37,14 +37,15 @@ def __protocol(raw_protocol: str) -> protocol.Protocol:
         spec = specs.PROTOCOLS[raw_protocol]
     else:
         similar_specs: list[str] = [s for s in specs.PROTOCOLS if s.startswith(raw_protocol)]
-        
+
         if len(similar_specs) == 0:
             err_msg = f"The protocol '{raw_protocol}' does not exist."
             raise argparse.ArgumentError(None, err_msg)
         if len(similar_specs) != 1:
-            err_msg = f"Ambiguous protocol specifier '{raw_protocol}'. Did you mean one of these?\n{'  \n'.join(similar_specs)}"
+            similar_str = "\n  ".join(similar_specs)
+            err_msg = f"Ambiguous protocol specifier '{raw_protocol}'. Did you mean one of these?\n  {similar_str}"
             raise argparse.ArgumentError(None, err_msg)
-            
+
         # If there's only one similar spec, assume that's what they're going for
         spec = specs.PROTOCOLS[similar_specs[0]]
 
@@ -63,15 +64,24 @@ def __parse_args() -> argparse.Namespace:
         The parsed command-line arguments.
     """
     parser = argparse.ArgumentParser(description=__about__.__summary__)
-    parser.add_argument("protocol", type=__protocol, nargs="+", help="the name of an existing protocol, or a field-by-field specification of a custom protocol")
+    parser.add_argument(
+        "protocol",
+        type=__protocol,
+        nargs="+",
+        help="the name of an existing protocol, or a field-by-field specification of a custom protocol",
+    )
     parser.add_argument("-v", "--version", action="version", version=f"{__about__.__title__} v{__about__.__version__}")
     parser.add_argument("-b", "--bits", type=int, required=False, help="the number of bits per line")
     parser.add_argument("-n", "--no-numbers", action="store_true", help="do not print bit numbers on top of the header")
-    parser.add_argument("--evenchar", type=str, required=False, help="character for the even positions of horizontal table borders")
-    parser.add_argument("--oddchar", type=str, required=False, help="character for the odd positions of horizontal table borders")
-    parser.add_argument("--startchar", type=str, required=False, help="character that starts horizontal table borders")
-    parser.add_argument("--endchar", type=str, required=False, help="character that ends horizontal table borders")
-    parser.add_argument("--sepchar", type=str, required=False, help="character that separates protocol fields")
+    parser.add_argument(
+        "--even-char", type=str, required=False, help="character for the even positions of horizontal table borders"
+    )
+    parser.add_argument(
+        "--odd-char", type=str, required=False, help="character for the odd positions of horizontal table borders"
+    )
+    parser.add_argument("--start-char", type=str, required=False, help="character that starts horizontal table borders")
+    parser.add_argument("--end-char", type=str, required=False, help="character that ends horizontal table borders")
+    parser.add_argument("--sep-char", type=str, required=False, help="character that separates protocol fields")
     return parser.parse_args()
 
 
@@ -86,17 +96,17 @@ def main() -> None:
             proto.bits_per_line = args.bits
         proto.print_top_tens = not args.no_numbers
         proto.print_top_units = not args.no_numbers
-        if args.evenchar is not None:
-            proto.even_fill_chr = args.evenchar
-        if args.oddchar is not None:
-            proto.odd_fill_chr = args.oddchar
-        if args.startchar is not None:
-            proto.start_chr = args.startchar
-        if args.endchar is not None:
-            proto.end_chr = args.endchar
-        if args.sepchar is not None:
-            proto.separator_chr = args.sepchar
-        print(proto, end="\n\n")
+        if args.even_char is not None:
+            proto.even_fill_chr = args.even_char
+        if args.odd_char is not None:
+            proto.odd_fill_chr = args.odd_char
+        if args.start_char is not None:
+            proto.start_chr = args.start_char
+        if args.end_char is not None:
+            proto.end_chr = args.end_char
+        if args.sep_char is not None:
+            proto.separator_chr = args.sep_char
+        print(proto, end="\n\n")  # noqa: T201
 
 
 if __name__ == "__main__":

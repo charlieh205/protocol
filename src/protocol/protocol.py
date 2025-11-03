@@ -57,7 +57,6 @@
 
 from __future__ import annotations
 
-
 __all__ = ("Protocol", "ProtocolError")
 
 
@@ -85,7 +84,7 @@ class ProtocolError(Exception):
         return self.__err_msg
 
 
-class Protocol:
+class Protocol:  # pylint: disable=too-many-instance-attributes
     """Class representing a network protocol header.
 
     Objects are constructed by passing a textual protocol specification. Once that is done, instances can be printed by
@@ -351,7 +350,9 @@ class Protocol:
             raise TypeError(err_msg)
         self.__print_top_units = print_top_units
 
-    def __parse_spec(self, specification: str) -> None:  # noqa: C901, PLR0912, PLR0915
+    def __parse_spec(  # noqa: C901, PLR0912, PLR0915  # pylint: disable=too-many-branches,too-many-statements
+        self, specification: str
+    ) -> None:
         """Parse the textual protocol specification and store the relevant internal states for later ASCII conversion.
 
         Parameters
@@ -531,7 +532,9 @@ class Protocol:
                 continue
         return new_fields
 
-    def __str__(self) -> str:  # noqa: C901, PLR0912, PLR0915
+    def __str__(  # noqa: C901, PLR0912, PLR0915  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
+        self,
+    ) -> str:
         """Get the ASCII representation of the protocol specification.
 
         Returns
@@ -551,7 +554,7 @@ class Protocol:
         current_line = ""
         fields_done = 0
         p = -1
-        while p < len(proto_fields) - 1:
+        while p < len(proto_fields) - 1:  # pylint: disable=too-many-nested-blocks
             p += 1
 
             # Extract all the info we need about the field
