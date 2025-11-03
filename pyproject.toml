@@ -14,10 +14,18 @@ protocol = "protocol.__main__:main"
 [tool.hatch.version]
 path = "src/protocol/__about__.py"
 
+[tool.hatch.envs.coverage]
+extra-dependencies = [
+    "coverage",
+]
+
 [tool.hatch.envs.format]
 extra-dependencies = [
     "ruff",
 ]
+
+[tool.hatch.envs.coverage.scripts]
+parse = "coverage report --show-missing --fail-under=90"
 
 [tool.hatch.envs.format.scripts]
 run = "ruff format"

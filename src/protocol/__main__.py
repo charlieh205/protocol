@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 
 import protocol
-from protocol import __about__, specs
+from protocol import __about__
 
 
 def __protocol(raw_protocol: str) -> protocol.Protocol:
@@ -33,10 +33,10 @@ def __protocol(raw_protocol: str) -> protocol.Protocol:
     # Assume it's a custom protocol if it contains a ":"
     if raw_protocol.count(":") > 0:
         spec = raw_protocol
-    elif raw_protocol in specs.PROTOCOLS:
-        spec = specs.PROTOCOLS[raw_protocol]
+    elif raw_protocol in protocol.PROTOCOLS:
+        spec = protocol.PROTOCOLS[raw_protocol]
     else:
-        similar_specs: list[str] = [s for s in specs.PROTOCOLS if s.startswith(raw_protocol)]
+        similar_specs: list[str] = [s for s in protocol.PROTOCOLS if s.startswith(raw_protocol)]
 
         if len(similar_specs) == 0:
             err_msg = f"The protocol '{raw_protocol}' does not exist."
@@ -47,7 +47,7 @@ def __protocol(raw_protocol: str) -> protocol.Protocol:
             raise argparse.ArgumentError(None, err_msg)
 
         # If there's only one similar spec, assume that's what they're going for
-        spec = specs.PROTOCOLS[similar_specs[0]]
+        spec = protocol.PROTOCOLS[similar_specs[0]]
 
     try:
         return protocol.Protocol(specification=spec)
