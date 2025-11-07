@@ -1,5 +1,7 @@
 # Protocol
 
+[![build](https://github.com/charlieh205/protocol/actions/workflows/cicd.yml/badge.svg)](https://github.com/charlieh205/protocol/actions/workflows/cicd.yml)
+
 A simple ASCII header generator for network protocols, written by Luis MartinGarcia.
 
 - E-Mail: <luis.mgarc@gmail.com>
