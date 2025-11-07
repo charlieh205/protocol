@@ -1,5 +1,5 @@
 ---
-name: Build Protocol package
+name: build
 
 on:
   push:
