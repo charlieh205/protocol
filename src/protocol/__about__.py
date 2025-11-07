@@ -6,7 +6,7 @@ __summary__ = (
     "from their own custom protocols in an ASCII RFC-like header diagram."
 )
 __uri__ = "https://github.com/charlieh205/protocol"
-__version__ = "1.1.0"
+__version__ = "1.0.1"
 __author__ = "Luis MartinGarcia"
 __email__ = "luis.mgarc@gmail.com"
 __copyright__ = "Copyright (C) 2025, Luis MartinGarcia (luis.mgarc@gmail.com)"
