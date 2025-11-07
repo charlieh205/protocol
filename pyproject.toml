@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "protocol"
 dynamic = ["version"]
-readme = "README.txt"
+readme = "README.md"
 requires-python = ">=3.9"
 
 [project.scripts]
